@@ -1,0 +1,181 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BGMI E-SPORTS Admin</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b100d;color:#f4f7f2;
+font-family:Arial,sans-serif;padding:20px}
+header,.panel{background:#151d17;border:1px solid #303b32;
+border-radius:18px;padding:20px;margin-bottom:18px}
+h1{margin:0 0 8px;font-size:25px}
+h2{font-size:19px}
+p,.muted{color:#a4b0a5;line-height:1.5}
+.badge{color:#b7fa69;font-weight:bold}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.stat{background:#202a21;border-radius:12px;padding:16px}
+.number{font-size:27px;font-weight:bold;margin-top:8px}
+button{border:0;border-radius:10px;padding:12px 16px;
+font-weight:bold;background:#b7fa69;color:#15200f}
+button.secondary{background:#29352b;color:white}
+input,select{width:100%;padding:13px;margin:7px 0 14px;
+border-radius:9px;border:1px solid #39443b;background:#0b100d;
+color:white;font-size:16px}
+.event{padding:14px 0;border-bottom:1px solid #303b32}
+footer{font-size:13px;color:#a4b0a5;padding:10px}
+</style>
+</head>
+<body>
+<header>
+  <div class="badge">BGMI E-SPORTS</div>
+  <h1>Admin Dashboard</h1>
+  <p>Local demo management panel</p>
+</header>
+
+<div class="stats">
+  <div class="stat">
+    <div class="muted">Demo tournaments</div>
+    <div class="number" id="eventCount">3</div>
+  </div>
+  <div class="stat">
+    <div class="muted">Registrations on this device</div>
+    <div class="number" id="registrationCount">0</div>
+  </div>
+</div>
+
+<section class="panel">
+  <h2>Create a demo tournament</h2>
+  <form id="eventForm">
+    <label>Tournament name</label>
+    <input id="eventName" required maxlength="60"
+      placeholder="e.g. Weekend Squad Cup">
+    <label>Mode</label>
+    <select id="eventMode">
+      <option>Solo</option>
+      <option>Duo</option>
+      <option>Squad</option>
+    </select>
+    <label>Map</label>
+    <select id="eventMap">
+      <option>Erangel</option>
+      <option>Miramar</option>
+      <option>Sanhok</option>
+    </select>
+    <label>Match time</label>
+    <input id="eventTime" required placeholder="e.g. 8:00 PM">
+    <button type="submit">Add demo tournament</button>
+  </form>
+  <p id="message" role="status"></p>
+</section>
+
+<section class="panel">
+  <h2>Demo tournament list</h2>
+  <div id="eventList"></div>
+</section>
+
+<section class="panel">
+  <h2>Registrations on this device</h2>
+  <div id="registrationList"></div>
+  <p class="muted">
+    These are only registrations stored in this browser.
+    This panel cannot view registrations from other players' phones.
+  </p>
+</section>
+
+<footer>
+  Prototype only. No secure admin login or shared online database
+  is connected yet.
+</footer>
+
+<script>
+const key = "bgmi-esports-admin-events";
+const defaults = [
+ {id:"solo-sprint",title:"Solo Sprint #01",mode:"Solo",
+  map:"Erangel",time:"6:00 PM"},
+ {id:"duo-dash",title:"Duo Dash #01",mode:"Duo",
+  map:"Miramar",time:"7:00 PM"},
+ {id:"squad-clash",title:"Squad Clash #01",mode:"Squad",
+  map:"Erangel",time:"8:00 PM"}
+];
+
+function read(key,fallback){
+ try {
+  const value=JSON.parse(localStorage.getItem(key));
+  return value ?? fallback;
+ } catch { return fallback; }
+}
+function safe(text){
+ const el=document.createElement("span");
+ el.textContent=String(text ?? "");
+ return el.textContent;
+}
+function render(){
+ const events=read(key,defaults);
+ const regs=read("bgmi-esports-registrations",[]);
+ document.getElementById("eventCount").textContent=events.length;
+ document.getElementById("registrationCount").textContent=regs.length;
+ const list=document.getElementById("eventList");
+ list.replaceChildren();
+
+ events.forEach((event,index)=>{
+  const item=document.createElement("div");
+  item.className="event";
+  const title=document.createElement("strong");
+  title.textContent=event.title;
+  const detail=document.createElement("p");
+  detail.textContent=event.mode+" · "+event.map+" · "+event.time;
+  item.append(title,detail);
+
+  if(index>=3){
+   const remove=document.createElement("button");
+   remove.className="secondary";
+   remove.textContent="Remove demo event";
+   remove.onclick=()=>{
+    if(!confirm("Remove this local demo event?"))return;
+    const updated=read(key,defaults);
+    updated.splice(index,1);
+    localStorage.setItem(key,JSON.stringify(updated));
+    render();
+   };
+   item.append(remove);
+  }
+  list.append(item);
+ });
+ if(!events.length)list.textContent="No demo tournaments yet.";
+
+ const regList=document.getElementById("registrationList");
+ regList.replaceChildren();
+ if(!regs.length){
+  regList.textContent="No registrations found in this browser.";
+ }else{
+  regs.forEach(reg=>{
+   const row=document.createElement("p");
+   const event=defaults.find(e=>e.id===reg.eventId);
+   row.textContent=(event?.title || reg.eventId)+" · "+(reg.team || "No team name");
+   regList.append(row);
+  });
+ }
+}
+document.getElementById("eventForm").addEventListener("submit",e=>{
+ e.preventDefault();
+ const events=read(key,defaults);
+ events.push({
+  id:"custom-"+Date.now(),
+  title:document.getElementById("eventName").value.trim(),
+  mode:document.getElementById("eventMode").value,
+  map:document.getElementById("eventMap").value,
+  time:document.getElementById("eventTime").value.trim()
+ });
+ localStorage.setItem(key,JSON.stringify(events));
+ e.target.reset();
+ document.getElementById("message").textContent=
+  "Demo tournament added on this device.";
+ render();
+});
+render();
+</script>
+</body>
+</html>
