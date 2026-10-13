@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#10130f">
+  <meta name="description" content="BGMI E-SPORTS community tournament demo">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <title>BGMI E-SPORTS</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><div class="brand-icon">BG</div><div><strong>BGMI E-SPORTS</strong><small>COMMUNITY TOURNAMENTS</small></div></div>
+    <button id="installBtn" class="ghost hidden">Install App</button>
+  </header>
+  <main>
+    <section class="hero">
+      <div class="eyebrow">PLAY • TEAM UP • COMPETE</div>
+      <h1>Your next match<br><span>starts here.</span></h1>
+      <p>Free community tournament demo. Join a listed event and track your registration.</p>
+      <div class="hero-actions"><a class="primary" href="#tournaments">Explore tournaments</a><a class="secondary" href="#profile">Player profile</a></div>
+      <div class="stats"><div><b id="eventCount">3</b><small>Events shown</small></div><div><b>FREE</b><small>Demo entry</small></div><div><b>24/7</b><small>Browse anytime</small></div></div>
+    </section>
+
+    <section id="profile" class="panel">
+      <div class="section-heading"><div><div class="eyebrow">PLAYER AREA</div><h2>Player details</h2></div><span class="tag">DEMO</span></div>
+      <p class="muted">Prototype only: details are saved on this device, not sent to a server. Don't enter sensitive information.</p>
+      <form id="profileForm" class="form-grid">
+        <label>In-game name<input id="playerName" maxlength="24" placeholder="e.g. RZ Player" required></label>
+        <label>BGMI Character ID<input id="playerId" inputmode="numeric" maxlength="20" placeholder="Your game ID" required></label>
+        <label>Phone number (optional)<input id="phone" inputmode="tel" maxlength="16" placeholder="For later OTP login"></label>
+        <button class="primary" type="submit">Save profile</button>
+      </form>
+      <p id="profileMessage" class="message" aria-live="polite"></p>
+    </section>
+
+    <section id="tournaments">
+      <div class="section-heading"><div><div class="eyebrow">FIND YOUR MATCH</div><h2>Upcoming tournaments</h2></div><span class="tag green">FREE DEMO</span></div>
+      <div class="filters"><button class="filter active" data-filter="All">All</button><button class="filter" data-filter="Solo">Solo</button><button class="filter" data-filter="Duo">Duo</button><button class="filter" data-filter="Squad">Squad</button></div>
+      <div id="tournamentList" class="tournament-list"></div>
+    </section>
+
+    <section id="registrations" class="panel">
+      <div class="section-heading"><div><div class="eyebrow">YOUR ACTIVITY</div><h2>My registrations</h2></div></div>
+      <div id="myRegistrations" class="empty">You haven't joined any demo event yet.</div>
+    </section>
+
+    <section class="notice">
+      <strong>Important</strong>
+      <p>This is a front-end prototype, not an official BGMI/KRAFTON service. Registration is stored only in your browser. No real room ID, prize, payment, SMS OTP, or live match is connected.</p>
+    </section>
+  </main>
+  <footer><div class="brand compact"><div class="brand-icon">BG</div><strong>BGMI E-SPORTS</strong></div><span>Community prototype • v0.1</span></footer>
+
+  <dialog id="joinDialog">
+    <form method="dialog" id="joinForm">
+      <button class="close" value="cancel" aria-label="Close">×</button>
+      <div class="eyebrow">TOURNAMENT REGISTRATION</div>
+      <h2 id="dialogTitle">Join tournament</h2>
+      <p id="dialogDescription" class="muted"></p>
+      <label>Team name (optional)<input id="teamName" maxlength="28" placeholder="Your team"></label>
+      <p class="muted tiny">Demo only. Make sure your profile is saved first. No payment is requested.</p>
+      <div class="dialog-actions"><button class="secondary" value="cancel">Cancel</button><button id="confirmJoin" class="primary" value="default">Confirm demo join</button></div>
+    </form>
+  </dialog>
+  <div id="toast" class="toast" role="status"></div>
+  <script src="app.js"></script>
+</body>
+</html>
